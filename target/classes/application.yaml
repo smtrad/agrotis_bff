@@ -1,0 +1,33 @@
+application:
+  name: agrotis_bff
+  version: 0.0.1-SNAPSHOT
+  hateoas: true
+server:
+  port: 8090
+  servlet:
+    context-path: /api
+springdoc:
+  api-docs:
+    enabled: true
+    path: /api-docs
+  swagger-ui:
+    path: /api-docs-ui
+    use-root-path: true
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/postgres
+    username: postgres
+    password: masterkey
+  jpa:
+    hibernate:
+      ddl-auto: update
+      dialect: org.hibernate.dialect.PostgreSQLDialect
+      jdbc:
+        lob.non-contextual-creation: true
+    properties:
+      hibernate:
+        show_sql: true
+  jackson:
+    default-property-inclusion: non-null
+    serialization:
+      FAIL_ON_EMPTY_BEANS: false
