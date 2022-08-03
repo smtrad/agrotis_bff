@@ -22,9 +22,11 @@ import com.fasterxml.jackson.annotation.JsonView;
 
 import br.com.agrotis.core.domain.AbstractEntity;
 import br.com.agrotis.core.domain.ModelView;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 @Entity
@@ -32,6 +34,8 @@ import lombok.ToString;
 		@UniqueConstraint(name = "cliente_nome", columnNames = {"nome"})
 	})
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 @EqualsAndHashCode(callSuper=true)
 @ToString(of = {"nome"}, callSuper = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)  
