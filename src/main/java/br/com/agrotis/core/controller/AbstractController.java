@@ -62,6 +62,10 @@ public abstract class AbstractController<MODEL extends AbstractEntity<?,MODEL_ID
  				.orElseThrow(() -> new AppException("Serviço não disponível nesta versão : ".concat(SERVICE_QUALIFIER), null, HttpStatus.NOT_IMPLEMENTED));
     }	
 		
+	protected Info getInfo() {
+		return getInfo(null);
+	}
+	
 	protected Info getInfo(Page<?> page) {
  		InfoBuilder builder = Info.builder();
  		if (Objects.nonNull(page)) {
@@ -75,9 +79,14 @@ public abstract class AbstractController<MODEL extends AbstractEntity<?,MODEL_ID
         build();
 	}
 	
-	protected ResponseEntity<AppResponse<MODEL>> asOK(MODEL body){
-		AppResponse.AppResponseBuilder<MODEL> builder = AppResponse.builder();
-		AppResponse<MODEL> payload = builder.info(getInfo(null)).content(body).build();
+	protected <T> AppResponse<T> getResponse(T body) {
+		AppResponse.AppResponseBuilder<T> builder = AppResponse.builder();
+		AppResponse<T> payload = builder.info(getInfo()).content(body).build();
+		return payload;
+	}
+	
+	protected <T> ResponseEntity<AppResponse<T>> asOK(T body){
+		AppResponse<T> payload = getResponse(body);
 		return ResponseEntity.status(HttpStatus.OK).body(payload);
 	}	
 	

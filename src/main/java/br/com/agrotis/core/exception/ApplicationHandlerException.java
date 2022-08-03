@@ -1,5 +1,7 @@
 package br.com.agrotis.core.exception;
 
+import java.util.Objects;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
@@ -37,17 +39,22 @@ public class ApplicationHandlerException extends ResponseEntityExceptionHandler 
 	@ExceptionHandler(value = AppException.class)
     protected ResponseEntity<Object> handleAppException(AppException e, WebRequest request) {
        log.error(e.getMessage());
-       HttpStatus status = e.getStatus();// != null ? e.getStatus() : HttpStatus.INTERNAL_SERVER_ERROR;
+       HttpStatus status = e.getStatus();// != null ? e.getStatus() : HttpStatus.INTERNAL_SERVER_ERROR;              
+       
+       Throwable cause = (Objects.nonNull(e.getCause())) ? e.getCause() : e;       	
+       
+       Error error = Error.builder().
+				code(String.valueOf(status.value())).
+				description(status.getReasonPhrase()).
+				message(DEFAULT_MSG).
+				errorMessage(e.getMessage()).				
+				cause(cause.getClass().getSimpleName()).
+		       	causeDescription(cause.getMessage()).
+				build();
+       
        return handleExceptionInternal(e, AppResponse.builder()
     		.info(Info.builder().appName(appProperties.getName()).appVersion(appProperties.getVersion()).build())
-			.error(Error.builder().
-					code(String.valueOf(status.value())).
-					description(status.getReasonPhrase()).
-					message(DEFAULT_MSG).
-					errorMessage(e.getMessage()).
-					cause(e.getClass().getSimpleName()).
-					causeDescription(e.getMessage()).
-					build())
+			.error(error)
 			.build(), new HttpHeaders(), status, request);
     }
 	

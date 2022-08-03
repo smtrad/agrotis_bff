@@ -1,0 +1,17 @@
+-------------------------------------------------------------------------------
+Test set: br.com.agrotis.bff.core.service.AbstractServiceTest
+-------------------------------------------------------------------------------
+Tests run: 1, Failures: 0, Errors: 1, Skipped: 0, Time elapsed: 0 s <<< FAILURE! - in br.com.agrotis.bff.core.service.AbstractServiceTest
+initializationError  Time elapsed: 0 s  <<< ERROR!
+org.mockito.exceptions.base.MockitoException: 
+
+
+No tests found in AbstractServiceTest
+Is the method annotated with @Test?
+Is the method public?
+
+Caused by: java.lang.reflect.InvocationTargetException
+Caused by: org.junit.runners.model.InvalidTestClassError: 
+Invalid test class 'br.com.agrotis.bff.core.service.AbstractServiceTest':
+  1. No runnable methods
+

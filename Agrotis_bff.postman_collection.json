@@ -437,6 +437,46 @@
 					"response": []
 				},
 				{
+					"name": "salvar (Implementa o botão salvar)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const jsonData = JSON.parse(responseBody);\r",
+									"pm.globals.set(\"idCliente\", jsonData.content.id);     "
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\"id\": \"{{idCliente}}\",\r\n \"nome\": \"Ricardo Vasconcelos\",\r\n \"dataInicial\": \"2022-02-02T17:41:44Z\",\r\n \"dataFinal\": \"2022-02-02T17:41:44Z\",\r\n \"infosPropriedade\": {\r\n    \"id\": \"{{idPropriedade}}\",\r\n    \"nome\": \"{{nomePropriedade}}\",\r\n    \"cnpj\": \"{{cnpjPropriedade}}\"\r\n },\r\n \"laboratorio\": {\r\n    \"id\": \"{{idLaboratorio}}\",\r\n    \"nome\": \"{{nomeLaboratorio}}\"\r\n }\r\n ,\"observacoes\": \"Notes for Ricardo Vasconcelos\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{api_gateway}}/v1/cliente/salvar",
+							"host": [
+								"{{api_gateway}}"
+							],
+							"path": [
+								"v1",
+								"cliente",
+								"salvar"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "insert",
 					"event": [
 						{
