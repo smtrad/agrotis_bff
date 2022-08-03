@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import br.com.agrotis.bff.domain.Propriedade;
 import br.com.agrotis.core.service.AbstractService;
 
-@Service
+@Service("PropriedadeService-v1")
 public class PropriedadeServiceV1 extends AbstractService<Propriedade,UUID> {
 
 }

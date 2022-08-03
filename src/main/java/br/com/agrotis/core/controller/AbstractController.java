@@ -6,9 +6,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-import javax.persistence.EntityManager;
-
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -17,12 +14,11 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.Links;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -38,46 +34,96 @@ import br.com.agrotis.core.domain.AbstractEntity;
 import br.com.agrotis.core.domain.ModelView;
 import br.com.agrotis.core.dto.AppResponse;
 import br.com.agrotis.core.dto.Info;
+import br.com.agrotis.core.dto.Info.InfoBuilder;
 import br.com.agrotis.core.exception.AppException;
-import br.com.agrotis.core.repository.GenericRepository;
-import br.com.agrotis.core.utils.JsonViewUtils;
+import br.com.agrotis.core.service.AbstractService;
+import br.com.agrotis.core.utils.BeanProducer;
 import br.com.agrotis.core.utils.ReflectionUtils;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public abstract class AbstractController<MODEL extends AbstractEntity<?,MODEL_ID>, MODEL_ID extends Serializable, SPEC extends Specification<MODEL>>  {
-	
-	
-
+			
 	@Autowired
-    private EntityManager entityManager;
-	
-	@Autowired
-    private GenericRepository<MODEL, MODEL_ID> repository;
+	private BeanProducer producer;	
 
     @Autowired
     private ApplicationProperties appProperties;
 
     @Autowired
-    private PagedResourcesAssembler<MODEL> pagedResourcesAssembler;
-      
+    private PagedResourcesAssembler<MODEL> pagedResourcesAssembler;              
+
+    private final String MODEL_QUALIFIER = ReflectionUtils.getParameterizedType(this.getClass(), 0).getSimpleName();
+    private final String SERVICE_QUALIFIER = MODEL_QUALIFIER.concat(AbstractService.SERVICE_SUFIX_QUALIFIER);
+    
+    @SuppressWarnings("unchecked")
+	protected AbstractService<MODEL, MODEL_ID> getService(Integer apiVersion) {       	
+ 		return producer.getInstance(AbstractService.class,  apiVersion, SERVICE_QUALIFIER)
+ 				.orElseThrow(() -> new AppException("Serviço não disponível nesta versão : ".concat(SERVICE_QUALIFIER), null, HttpStatus.NOT_IMPLEMENTED));
+    }	
+		
+	protected Info getInfo(Page<?> page) {
+ 		InfoBuilder builder = Info.builder();
+ 		if (Objects.nonNull(page)) {
+ 			builder.page(page.getNumber()).
+            size(page.getSize()).
+            hasNext(page.hasNext());
+ 		}
+		return builder.
+        appName(appProperties.getName()).
+        appVersion(appProperties.getVersion()).
+        build();
+	}
+	
+	protected ResponseEntity<AppResponse<MODEL>> asOK(MODEL body){
+		AppResponse.AppResponseBuilder<MODEL> builder = AppResponse.builder();
+		AppResponse<MODEL> payload = builder.info(getInfo(null)).content(body).build();
+		return ResponseEntity.status(HttpStatus.OK).body(payload);
+	}	
+	
+	protected ResponseEntity<AppResponse<List<MODEL>>> asOK(Page<MODEL> page, Integer apiInteger){
+		AppResponse.AppResponseBuilder<List<MODEL>> builder = AppResponse.builder();
+		AppResponse<List<MODEL>> payload = builder
+				.info(getInfo(page))				
+				.content(page.toList())
+				.build();
+		payload.add(hateos(page, apiInteger));
+		return ResponseEntity.status(HttpStatus.OK).body(payload);
+	}
+	
+	protected int getVersion(Integer apiVersion){
+		return Optional.ofNullable(apiVersion).orElse(1);
+	}
+		
+	protected Links hateos(Page<MODEL> page, Integer apiVersion){
+		if (appProperties.getHateoas().booleanValue()) {
+        	PagedModel<EntityModel<MODEL>> pageResult = pagedResourcesAssembler.toModel(page);            
+            for (MODEL model : page.toList()) {
+                try {
+					model.add(WebMvcLinkBuilder.linkTo(this.getClass(),
+					        this.getClass().getMethod("get", Integer.class, Serializable.class),
+					        apiVersion,
+					        model.getId()).withSelfRel());
+				} catch (NoSuchMethodException | SecurityException e) {
+					log.error("Falha ao mapear metainfo (hateos): {}", e.getMessage());
+				}
+            }
+            return pageResult.getLinks();
+        }
+		return Links.NONE;
+	}
 
     @GetMapping("/{id}")
     @JsonView({ModelView.GET.class})
     public ResponseEntity<AppResponse<MODEL>> get(
             @PathVariable(value = "apiVersion")  Integer apiVersion,
-            @PathVariable(value = "id")  MODEL_ID id) {
-    	log.info("get id: {}", id);
-        MODEL model = repository.findById(id).orElseThrow(() -> new AppException("Registro não encontrado", null, HttpStatus.NOT_FOUND));
-        log.info("found {} : {}", id, model);
-        AppResponse.AppResponseBuilder<MODEL> builder = AppResponse.builder();
-        return ResponseEntity.status(HttpStatus.OK).
-        		body(builder.
-        				info(Info.builder().
-                                appName(appProperties.getName()).
-                                appVersion(appProperties.getVersion()).
-                                build()).
-        				content(model).build());
+            @PathVariable(value = "id")  MODEL_ID id) {    	
+    	log.info("get {} id: {}", MODEL_QUALIFIER, id);
+    	apiVersion = getVersion(apiVersion);
+    	AbstractService<MODEL, MODEL_ID> service = getService(apiVersion);    	
+        MODEL model = service.get(apiVersion, id);
+        log.info("found {} : {}", id, model);        
+        return asOK(model);
     }
 
     @GetMapping
@@ -87,110 +133,52 @@ public abstract class AbstractController<MODEL extends AbstractEntity<?,MODEL_ID
             @PageableDefault(page = 0, size = 100, sort = "id", direction = Sort.Direction.ASC) Pageable pageable
             ,SPEC modelSpecificationTemplate            
     ) throws NoSuchMethodException {
-    	log.info("find with: {}", pageable);
-        Page<MODEL> page = repository.findAll(modelSpecificationTemplate, pageable);
-        
-        AppResponse.AppResponseBuilder<List<MODEL>> builder = AppResponse.builder();
-        AppResponse<List<MODEL>> response = builder.content(page.toList()).
-                info(Info.builder().
-                        appName(appProperties.getName()).
-                        appVersion(appProperties.getVersion()).
-                        page(page.getNumber()).
-                        size(page.getSize()).
-                        hasNext(page.hasNext()).
-                        build()).build();
-        
-        if (appProperties.getHateoas().booleanValue()) {
-        	PagedModel<EntityModel<MODEL>> pageResult = pagedResourcesAssembler.toModel(page);
-            response.add(pageResult.getLinks());
-            for (MODEL model : page.toList()) {
-                model.add(WebMvcLinkBuilder.linkTo(this.getClass(),
-                        this.getClass().getMethod("get", Integer.class, Serializable.class),
-                        apiVersion,
-                        model.getId()).withSelfRel());
-            }
-        }
-        
-
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+    	log.info("find {} : {} , {}", MODEL_QUALIFIER, modelSpecificationTemplate, pageable);
+    	apiVersion = getVersion(apiVersion);
+    	AbstractService<MODEL, MODEL_ID> service = getService(apiVersion);
+        Page<MODEL> page = service.find(apiVersion, pageable, modelSpecificationTemplate);        
+        return asOK(page,apiVersion);                                
     }
-    
-    private AbstractEntity<?,?> manageEntity(AbstractEntity<?,?> entity){
-    	if ((Objects.nonNull(entity))&&(Objects.nonNull(entity.getId()))) {
-    		return //entityManager.merge(entity);
-    				entityManager.find(entity.getClass(), entity.getId());
-    	}
-    	return entity;
-    }
+        
 
     @PostMapping
     @JsonView({ModelView.GET.class})
-    @Transactional(isolation = Isolation.SERIALIZABLE)
     public ResponseEntity<AppResponse<MODEL>> insert(
-            @PathVariable(value = "apiVersion")  Optional<Integer> apiVersion,
-            @RequestBody 
-            @Validated({ModelView.INSERT.class}) //@JsonView({ModelView.INSERT.class}) 
-            MODEL source) {
-    	log.info("insert : {}", source);    	
-    	ReflectionUtils.updateValueOfType(source, AbstractEntity.class, this::manageEntity);
-    	entityManager.persist(source);
-		log.info("inserted : {}", source);
-		AppResponse.AppResponseBuilder<MODEL> builder = AppResponse.builder();
-        return ResponseEntity.status(HttpStatus.OK).
-        		body(builder.
-        				info(Info.builder().
-                                appName(appProperties.getName()).
-                                appVersion(appProperties.getVersion()).
-                                build()).
-        				content(source).build());
+            @PathVariable(value = "apiVersion")  Integer apiVersion,
+            @RequestBody @Validated({ModelView.INSERT.class}) MODEL model) {
+    	log.info("insert {}", MODEL_QUALIFIER);    	
+    	apiVersion = getVersion(apiVersion);
+    	AbstractService<MODEL, MODEL_ID> service = getService(apiVersion);
+    	service.insert(apiVersion, model);
+		log.info("inserted {} : {}", MODEL_QUALIFIER, model.getId());
+		return asOK(model);
     }
 
-    @SuppressWarnings("unchecked")
 	@PutMapping("/{id}")
     @JsonView({ModelView.GET.class})
-    @Transactional(isolation = Isolation.SERIALIZABLE)
     public ResponseEntity<AppResponse<MODEL>> update(
-            @PathVariable(value = "apiVersion")  Optional<Integer> apiVersion,
+            @PathVariable(value = "apiVersion")  Integer apiVersion,
             @PathVariable(value = "id")  MODEL_ID id,
-            @RequestBody @Validated({ModelView.UPDATE.class}) //@JsonView({ModelView.UPDATE.class})
-            MODEL source){
-    	log.info("update : {} as {}", id, source);
-    	source.setId(id);
-    	MODEL target = (MODEL) Optional.ofNullable(manageEntity(source))
-    			.orElseThrow(() -> new AppException("Registro não encontrado com id:".concat(id.toString()), null, HttpStatus.NOT_FOUND));
-    	ReflectionUtils.updateValueOfType(source, AbstractEntity.class, this::manageEntity);    	
-    	BeanUtils.copyProperties(source, target, JsonViewUtils.getNullPropertyNames(source));
-    	//target = repository.save(target);
-    	//entityManager.flush();
-    	log.info("updated : {}", target);
-    	AppResponse.AppResponseBuilder<MODEL> builder = AppResponse.builder();
-        return ResponseEntity.status(HttpStatus.OK).
-        		body(builder.
-        				info(Info.builder().
-                                appName(appProperties.getName()).
-                                appVersion(appProperties.getVersion()).
-                                build()).
-        				content(target).build());
+            @RequestBody @Validated({ModelView.UPDATE.class}) MODEL source){
+    	log.info("update {} : {}", MODEL_QUALIFIER, id);    	
+    	apiVersion = getVersion(apiVersion);
+    	AbstractService<MODEL, MODEL_ID> service = getService(apiVersion);
+    	MODEL target = service.update(apiVersion, id, source);
+		log.info("updated {} : {}", MODEL_QUALIFIER, id);
+		return asOK(target);    	
     }
 
     @DeleteMapping("/{id}")
     @JsonView({ModelView.GET.class})
     public ResponseEntity<AppResponse<MODEL>> remove(
-            @PathVariable(value = "apiVersion")  Optional<Integer> apiVersion,
-            @PathVariable(value = "id")  MODEL_ID id){
-    	log.info("remove : {}", id);    		
-		MODEL target = repository.findById(id)
-    			.orElseThrow(() -> new AppException("Registro não encontrado com id:".concat(id.toString()), null, HttpStatus.NOT_FOUND));
-		repository.delete(target);
-		log.info("removed : {}", id);
-		AppResponse.AppResponseBuilder<MODEL> builder = AppResponse.builder();
-        return ResponseEntity.status(HttpStatus.OK).
-        		body(builder.
-        				info(Info.builder().
-                                appName(appProperties.getName()).
-                                appVersion(appProperties.getVersion()).
-                                build()).
-        				content(target).build());
+            @PathVariable(value = "apiVersion")  Integer apiVersion,
+            @PathVariable(value = "id")  MODEL_ID id) {
+    	log.info("remove {} : {}", MODEL_QUALIFIER, id);    	
+    	apiVersion = getVersion(apiVersion);
+    	AbstractService<MODEL, MODEL_ID> service = getService(apiVersion);
+    	MODEL target = service.remove(apiVersion, id);
+		log.info("removed {} : {}", MODEL_QUALIFIER, id);
+		return asOK(target);
     }
 
 }

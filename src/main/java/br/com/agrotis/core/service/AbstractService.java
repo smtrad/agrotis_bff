@@ -25,6 +25,8 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public abstract class AbstractService<MODEL extends AbstractEntity<?,MODEL_ID>, MODEL_ID extends Serializable>  {
+	
+	public static final String SERVICE_SUFIX_QUALIFIER = "Service";
 		
 	@Autowired
     protected EntityManager entityManager;
