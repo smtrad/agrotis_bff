@@ -1,0 +1,568 @@
+{
+	"info": {
+		"_postman_id": "20f6b95a-ff10-4266-ac60-7a3c30088067",
+		"name": "Agrotis_bff",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "2827421"
+	},
+	"item": [
+		{
+			"name": "laboratorio",
+			"item": [
+				{
+					"name": "find",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const jsonData = JSON.parse(responseBody);\r",
+									"if (jsonData.content.length > 0){\r",
+									"    pm.globals.set(\"idLaboratorio\", jsonData.content[0].id); \r",
+									"    pm.globals.set(\"nomeLaboratorio\", jsonData.content[0].nome);    \r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "token",
+								"value": "{app_token}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{api_gateway}}/v1/laboratorio?nome=Agro",
+							"host": [
+								"{{api_gateway}}"
+							],
+							"path": [
+								"v1",
+								"laboratorio"
+							],
+							"query": [
+								{
+									"key": "nome",
+									"value": "Agro"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api_gateway}}/v1/laboratorio/{{idLaboratorio}}",
+							"host": [
+								"{{api_gateway}}"
+							],
+							"path": [
+								"v1",
+								"laboratorio",
+								"{{idLaboratorio}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "insert",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const jsonData = JSON.parse(responseBody);\r",
+									"pm.globals.set(\"idLaboratorio\", jsonData.content.id);\r",
+									"pm.globals.set(\"nomeLaboratorio\", jsonData.content.nome);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"nome\": \"Skyrim Lab\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{api_gateway}}/v1/laboratorio",
+							"host": [
+								"{{api_gateway}}"
+							],
+							"path": [
+								"v1",
+								"laboratorio"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"nome\": \"Agro Jet Lab S/A\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{api_gateway}}/v1/laboratorio/{{idLaboratorio}}",
+							"host": [
+								"{{api_gateway}}"
+							],
+							"path": [
+								"v1",
+								"laboratorio",
+								"{{idLaboratorio}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "remove",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"nome\": \"New Agro S/A 2\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{api_gateway}}/v1/laboratorio/{{idLaboratorio}}",
+							"host": [
+								"{{api_gateway}}"
+							],
+							"path": [
+								"v1",
+								"laboratorio",
+								"{{idLaboratorio}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "propriedade",
+			"item": [
+				{
+					"name": "find",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const jsonData = JSON.parse(responseBody);\r",
+									"if (jsonData.content.length > 0) {\r",
+									"    pm.globals.set(\"idPropriedade\", jsonData.content[0].id);\r",
+									"    pm.globals.set(\"nomePropriedade\", jsonData.content[0].nome);\r",
+									"    pm.globals.set(\"cnpjPropriedade\", jsonData.content[0].cnpj);\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "token",
+								"value": "{app_token}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{api_gateway}}/v1/propriedade",
+							"host": [
+								"{{api_gateway}}"
+							],
+							"path": [
+								"v1",
+								"propriedade"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api_gateway}}/v1/propriedade/{{idPropriedade}}",
+							"host": [
+								"{{api_gateway}}"
+							],
+							"path": [
+								"v1",
+								"propriedade",
+								"{{idPropriedade}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "insert",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const jsonData = JSON.parse(responseBody);\r",
+									"pm.globals.set(\"idPropriedade\", jsonData.content.id);\r",
+									"pm.globals.set(\"nomePropriedade\", jsonData.content.nome);\r",
+									"pm.globals.set(\"cnpjPropriedade\", jsonData.content.cnpj);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": " {\r\n  \"nome\": \"Fazenda Campo Verde\",\r\n   \"cnpj\": \"00000001000100\"\r\n }\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{api_gateway}}/v1/propriedade",
+							"host": [
+								"{{api_gateway}}"
+							],
+							"path": [
+								"v1",
+								"propriedade"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"nome\": \"Fazendinha Top\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{api_gateway}}/v1/propriedade/{{idPropriedade}}",
+							"host": [
+								"{{api_gateway}}"
+							],
+							"path": [
+								"v1",
+								"propriedade",
+								"{{idPropriedade}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "remove",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"nome\": \"New Agro S/A 2\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{api_gateway}}/v1/propriedade/{{idPropriedade}}",
+							"host": [
+								"{{api_gateway}}"
+							],
+							"path": [
+								"v1",
+								"propriedade",
+								"{{idPropriedade}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "cliente",
+			"item": [
+				{
+					"name": "find all",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const jsonData = JSON.parse(responseBody);\r",
+									"if (jsonData.content.length > 0){\r",
+									"    pm.globals.set(\"idCliente\", jsonData.content[0].id);\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "token",
+								"value": "{app_token}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{api_gateway}}/v1/cliente",
+							"host": [
+								"{{api_gateway}}"
+							],
+							"path": [
+								"v1",
+								"cliente"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "find by \"nome\" (Like)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const jsonData = JSON.parse(responseBody);\r",
+									"if (jsonData.content.length > 0){\r",
+									"    pm.globals.set(\"idCliente\", jsonData.content[0].id);\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "token",
+								"value": "{app_token}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{api_gateway}}/v1/cliente?nome=Trad",
+							"host": [
+								"{{api_gateway}}"
+							],
+							"path": [
+								"v1",
+								"cliente"
+							],
+							"query": [
+								{
+									"key": "nome",
+									"value": "Trad"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api_gateway}}/v1/cliente/{{idCliente}}",
+							"host": [
+								"{{api_gateway}}"
+							],
+							"path": [
+								"v1",
+								"cliente",
+								"{{idCliente}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "insert",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const jsonData = JSON.parse(responseBody);\r",
+									"pm.globals.set(\"idCliente\", jsonData.content.id);     "
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n \"nome\": \"Jon Doe\",\r\n \"dataInicial\": \"2022-02-02T17:41:44Z\",\r\n \"dataFinal\": \"2022-02-02T17:41:44Z\",\r\n \"infosPropriedade\": {\r\n    \"id\": \"{{idPropriedade}}\",\r\n    \"nome\": \"{{nomePropriedade}}\",\r\n    \"cnpj\": \"{{cnpjPropriedade}}\"\r\n },\r\n \"laboratorio\": {\r\n    \"id\": \"{{idLaboratorio}}\",\r\n    \"nome\": \"{{nomeLaboratorio}}\"\r\n }\r\n ,\"observacoes\": \"Notes for Jon\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{api_gateway}}/v1/cliente",
+							"host": [
+								"{{api_gateway}}"
+							],
+							"path": [
+								"v1",
+								"cliente"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{     \r\n    \"laboratorio\": {\r\n        \"id\": \"{{idLaboratorio}}\"\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{api_gateway}}/v1/cliente/{{idCliente}}",
+							"host": [
+								"{{api_gateway}}"
+							],
+							"path": [
+								"v1",
+								"cliente",
+								"{{idCliente}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "remove",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"nome\": \"New Agro S/A 2\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{api_gateway}}/v1/cliente/{{idCliente}}",
+							"host": [
+								"{{api_gateway}}"
+							],
+							"path": [
+								"v1",
+								"cliente",
+								"{{idCliente}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "app_token",
+			"value": "none",
+			"type": "string"
+		},
+		{
+			"key": "api_gateway",
+			"value": "http://localhost:8081/api/bff"
+		}
+	]
+}
