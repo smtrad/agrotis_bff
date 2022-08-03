@@ -1,11 +1,18 @@
 application:
   name: ^project.name^
   version: ^project.version^
-  hateoas: true
+  hateoas: false
 server:
-  port: 8090
+  port: 8081
   servlet:
-    context-path: /api
+    context-path: /api/bff
+logging:
+  level: 
+#      root: trace
+    '[com.fasterxml.jackson]': TRACE
+#    '[org.springframework.data]': INFO
+#    '[org.hibernate]': INFO
+#    '[javax.persistence]': INFO
 springdoc:
   api-docs:
     enabled: true
@@ -14,20 +21,27 @@ springdoc:
     path: /api-docs-ui
     use-root-path: true
 spring:
+  jackson:
+    default-property-inclusion: non-null
+    serialization:
+      FAIL_ON_EMPTY_BEANS: false
   datasource:
     url: jdbc:postgresql://localhost:5432/postgres
     username: postgres
     password: masterkey
   jpa:
-    hibernate:
-      ddl-auto: update
-      dialect: org.hibernate.dialect.PostgreSQLDialect
-      jdbc:
-        lob.non-contextual-creation: true
+    open-in-view: false
     properties:
+      javax:
+        persistence:
+          schema-generation:
+            database:
+              action: update
       hibernate:
-        show_sql: true
-  jackson:
-    default-property-inclusion: non-null
-    serialization:
-      FAIL_ON_EMPTY_BEANS: false
+        schema_update.unique_constraint_strategy: RECREATE_QUIETLY
+        show_sql: true        
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        jdbc:
+          lob.non-contextual-creation: true
+        hbm2dll:
+          create_namespaces: true

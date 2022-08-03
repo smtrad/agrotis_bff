@@ -1,0 +1,27 @@
+{
+  "groups": [
+    {
+      "name": "application",
+      "type": "br.com.agrotis.core.config.ApplicationProperties",
+      "sourceType": "br.com.agrotis.core.config.ApplicationProperties"
+    }
+  ],
+  "properties": [
+    {
+      "name": "application.hateoas",
+      "type": "java.lang.Boolean",
+      "sourceType": "br.com.agrotis.core.config.ApplicationProperties"
+    },
+    {
+      "name": "application.name",
+      "type": "java.lang.String",
+      "sourceType": "br.com.agrotis.core.config.ApplicationProperties"
+    },
+    {
+      "name": "application.version",
+      "type": "java.lang.String",
+      "sourceType": "br.com.agrotis.core.config.ApplicationProperties"
+    }
+  ],
+  "hints": []
+}
