@@ -17,6 +17,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
+
 @MappedSuperclass
 @Data
 @EqualsAndHashCode(of = {"id"}, callSuper = false)

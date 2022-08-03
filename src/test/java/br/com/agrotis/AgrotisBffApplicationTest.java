@@ -1,4 +1,4 @@
-package br.com.agrotis.bff;
+package br.com.agrotis;
 
 public class AgrotisBffApplicationTest {
 

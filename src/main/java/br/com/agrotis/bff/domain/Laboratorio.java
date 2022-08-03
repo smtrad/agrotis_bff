@@ -9,11 +9,13 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotBlank;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonView;
 
 import br.com.agrotis.core.domain.AbstractEntity;
 import br.com.agrotis.core.domain.ModelView;
+import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -27,7 +29,8 @@ import lombok.ToString;
 @EqualsAndHashCode(callSuper = true)
 @ToString(of = {"nome"}, callSuper = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-//@JsonIgnoreProperties(value={}, allowSetters = true)
+@JsonIgnoreProperties(value={}, allowSetters = true)
+@Builder
 public class Laboratorio extends AbstractEntity<Laboratorio, UUID> {
     
 	private static final long serialVersionUID = 1L;

@@ -1,4 +1,4 @@
-package br.com.agrotis.bff.core.utils;
+package br.com.agrotis.core.utils;
 
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;

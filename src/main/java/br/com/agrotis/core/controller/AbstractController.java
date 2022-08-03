@@ -90,11 +90,11 @@ public abstract class AbstractController<MODEL extends AbstractEntity<?,MODEL_ID
 		return ResponseEntity.status(HttpStatus.OK).body(payload);
 	}	
 	
-	protected ResponseEntity<AppResponse<List<MODEL>>> asOK(Page<MODEL> page, Integer apiInteger){
+	protected ResponseEntity<AppResponse<List<MODEL>>> asOK(Page<MODEL> page, Integer apiInteger) {
 		AppResponse.AppResponseBuilder<List<MODEL>> builder = AppResponse.builder();
 		AppResponse<List<MODEL>> payload = builder
 				.info(getInfo(page))				
-				.content(page.toList())
+				.content(page.getContent())
 				.build();
 		payload.add(hateos(page, apiInteger));
 		return ResponseEntity.status(HttpStatus.OK).body(payload);
@@ -104,22 +104,24 @@ public abstract class AbstractController<MODEL extends AbstractEntity<?,MODEL_ID
 		return Optional.ofNullable(apiVersion).orElse(1);
 	}
 		
-	protected Links hateos(Page<MODEL> page, Integer apiVersion){
-		if (appProperties.getHateoas().booleanValue()) {
-        	PagedModel<EntityModel<MODEL>> pageResult = pagedResourcesAssembler.toModel(page);            
-            for (MODEL model : page.toList()) {
-                try {
-					model.add(WebMvcLinkBuilder.linkTo(this.getClass(),
-					        this.getClass().getMethod("get", Integer.class, Serializable.class),
-					        apiVersion,
-					        model.getId()).withSelfRel());
-				} catch (NoSuchMethodException | SecurityException e) {
-					log.error("Falha ao mapear metainfo (hateos): {}", e.getMessage());
-				}
-            }
-            return pageResult.getLinks();
-        }
-		return Links.NONE;
+	protected Links hateos(Page<MODEL> page, Integer apiVersion) {
+		try {
+			if (appProperties.getHateoas().booleanValue()) {
+	        	PagedModel<EntityModel<MODEL>> pageResult = pagedResourcesAssembler.toModel(page);            
+	            for (MODEL model : page.toList()) {
+	
+						model.add(WebMvcLinkBuilder.linkTo(this.getClass(),
+						        this.getClass().getMethod("get", Integer.class, Serializable.class),
+						        apiVersion,
+						        model.getId()).withSelfRel());				
+	
+	            }
+	            return pageResult.getLinks();
+	        }
+			return Links.NONE;
+		} catch (NoSuchMethodException | SecurityException e) {
+			throw new AppException("Falha no processamento HETEOAS.", e);
+		}
 	}
 
     @GetMapping("/{id}")
@@ -141,7 +143,7 @@ public abstract class AbstractController<MODEL extends AbstractEntity<?,MODEL_ID
             @PathVariable(value = "apiVersion")  Integer apiVersion,
             @PageableDefault(page = 0, size = 100, sort = "id", direction = Sort.Direction.ASC) Pageable pageable
             ,SPEC modelSpecificationTemplate            
-    ) throws NoSuchMethodException {
+    ) {
     	log.info("find {} : {} , {}", MODEL_QUALIFIER, modelSpecificationTemplate, pageable);
     	apiVersion = getVersion(apiVersion);
     	AbstractService<MODEL, MODEL_ID> service = getService(apiVersion);

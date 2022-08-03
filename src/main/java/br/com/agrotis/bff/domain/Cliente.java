@@ -22,6 +22,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 
 import br.com.agrotis.core.domain.AbstractEntity;
 import br.com.agrotis.core.domain.ModelView;
+import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -34,6 +35,7 @@ import lombok.ToString;
 @EqualsAndHashCode(callSuper=true)
 @ToString(of = {"nome"}, callSuper = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)  
+@Builder
 public class Cliente extends AbstractEntity<Cliente, UUID> {
     
 	private static final long serialVersionUID = 1L;

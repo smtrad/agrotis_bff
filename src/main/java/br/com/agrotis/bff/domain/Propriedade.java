@@ -15,6 +15,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 
 import br.com.agrotis.core.domain.AbstractEntity;
 import br.com.agrotis.core.domain.ModelView;
+import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -28,6 +29,7 @@ import lombok.ToString;
 @ToString(of = {"cnpj","nome"}, callSuper = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(value={}, allowSetters = true)
+@Builder
 public class Propriedade extends AbstractEntity<Propriedade, UUID> {
     
 	private static final long serialVersionUID = 1L;
